@@ -1,0 +1,111 @@
+<div class="container">
+    <div class="row col-12">
+        <div class="col-6">
+            <h2>Archivos</h2>
+        </div>
+        <div class="col-6">
+
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    Acciones
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" (click)="nuevo()">Nuevo</a></li>
+                    <li><a class="dropdown-item" (click)="borrar()">Borrar</a></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Dueños</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (item of files; track $index) {
+
+
+            <tr>
+
+
+                <th scope="row"><input type="checkbox" (change)="chcked($index, $event)"></th>
+                <td>
+                    <span data-bs-toggle="tooltip" [attr.title]="item.name" data-bs-placement="top"
+                        data-bs-custom-class="custom-tooltip">
+                        {{ item.name.length > 10 ? (item.name | slice:0:10) + '...' : item.name }}
+                    </span>
+                </td>
+
+
+                <td>{{item.creation | date}}</td>
+
+                @for (owner of item.owners.slice(0,3); track $index) {
+                <td><img class="rounded-circle d-flex justify-content-center align-item-center"
+                        src="{{owner.avatarUrl}}" alt="" style="width: 30px; height: 30px;">
+                </td>
+
+                }
+                @if(item.owners.length > 3){
+                <td> <ng-container>
+                        <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center"
+                            style="width: 30px; height: 30px;">
+                            +{{ item.owners.length - 3 }}
+                        </div>
+                    </ng-container>
+                </td>
+
+                }
+
+
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@if(formuActive){
+<form #form="ngForm" (ngSubmit)="sendform(form)" class="container">
+    <label for="" class="form-label">Nombre:</label>
+    <input type="text" #nombre="ngModel" class="form-control" name="nombre" [(ngModel)]="newFile.name" required
+        [ngClass]="{'is-invalid': nombre.invalid  && (nombre.dirty),'is-valid': nombre.valid }">
+
+    <label for="" class="form-label">Fecha:</label>
+    <input type="date" #fecha="ngModel" class="form-control" name="fecha" [(ngModel)]="newFile.creation" required
+        [ngClass]="{'is-invalid': fecha.invalid  && (fecha.dirty || fecha.touched),'is-valid': fecha.valid }">
+
+    <label for="" class="form-label">Tipo Archivo:</label>
+    <select class="form-control" name="tipo" [(ngModel)]="newFile.type" required>
+        <option [ngValue]="null" disabled>Seleccione tipo</option>
+        <option [ngValue]="FileType.FILE">Archivo</option>
+        <option [ngValue]="FileType.FOLDER">Carpeta</option>
+    </select>
+
+    <select class="form-control" name="dueño" [(ngModel)]="selectedOwner" required>
+        <option [ngValue]="null" disabled>Seleccione un dueño</option>
+        <option *ngFor="let owner of owners" [ngValue]="owner">{{ owner.name }}</option>
+      </select>
+      <button type="button" class="btn btn-primary mt-2" (click)="addOwner()">Agregar dueño</button>
+      
+      
+      
+      
+      <div class="mt-3">
+        <label>Dueños seleccionados:</label>
+        <ul class="list-group">
+          <li *ngFor="let owner of newFile.owners; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
+            {{ owner.name }}
+            <button type="button" class="btn btn-danger btn-sm" (click)="removeOwner(i)">Eliminar</button>
+          </li>
+        </ul>
+      </div>
+      <button class="btn btn-primary" type="submit">Enviar</button>
+      <button type="submit" class="btn btn-success mt-3" [disabled]="!form.valid">Enviar</button>
+</form>
+}
